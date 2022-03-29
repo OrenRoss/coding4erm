@@ -1,0 +1,91 @@
+---
+title: "Grading - Wk 4"
+author: "Oren"
+date: "2/18/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r Bond Price}
+
+#Bond Price
+
+y = 0.03
+face = 2000000
+couponRate = 0.04
+m = 10
+ppy = 2
+
+
+x = getBondPrice(y, face, couponRate, m,  1)
+round(x) == 2170604
+
+x = getBondPrice(y, face, couponRate, m,  2)
+round(x) == 2171686
+
+```
+
+
+
+```{r Bond Duration}
+y = 0.03
+face = 2000000
+couponRate = 0.04
+m = 10
+
+x = getBondDuration(y, face, couponRate, m)
+round(x,2) == 8.51
+```
+
+
+```{r Bond Effective Sensitivity}
+y = 0.03
+face = 2000000
+couponRate = 0.04
+m = 10
+ppy = 1
+
+# unit test:
+
+x = getBPV(y, face, couponRate, m,  ppy)
+round(x) == -1792
+
+```
+
+
+```{r Arrays}
+vec = matrix(data = 1:3,nrow = 1,ncol = 3)
+mat = matrix(data = 1:9,nrow = 3,ncol = 3,byrow = T)
+ans = vector(mode = "numeric",length = 3)
+
+x = MyMatMult(vec,mat)
+x[1] == 30 & x[2] == 36 & x[3] == 42
+
+```
+
+
+
+```{r Road Trip}
+library(readxl)
+d <- read_excel("C4RM_Class4.xlsx", 
+                sheet = "qDataObject", range = "C38:Z48", 
+                col_names = FALSE)
+d = as.matrix(d)
+# Unit test:
+obj = makeObj(d)
+round(obj[2,2,3,4],4) == .4863
+
+```
+
+
+
+```{r FIzzBuzz}
+x = FizzBuzz(40,45)
+x[1] == "buzz" & x[2] == "41" & x[6] == "fizzbuzz"
+
+```
+

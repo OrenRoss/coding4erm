@@ -1,0 +1,321 @@
+---
+title: "Grader"
+author: "Oren"
+date: "3/7/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE, cache = TRUE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+
+library(readxl)
+library(quantmod)
+library(tidyverse)
+students = list.files("Students/")
+
+students_files = paste("Students", students, sep = "/")
+# students = data.frame(students)
+# students$score = 0
+```
+
+
+``` {r loading students, include=FALSE, results = hide}
+grading = 47
+
+# removes functions
+rm(list=lsf.str())
+rm(list=ls()[! ls() %in% c("students","students_files", "gradin", "followups", 'grading')])
+
+
+score <- data.frame(matrix(ncol = 3, nrow = 12))
+colnames(score) <- c('question', 'points', 'notes')
+score$points <- 0
+score$question <- paste('q', 1:12)
+
+file.edit(students_files[grading])
+source(students_files[grading])
+# load(students_files[1])
+```
+
+
+```{r q1 - StringsNData}
+
+
+if (exists("Datavec2DataFrame") == TRUE){
+  myvec = c('NY_Rainy','NY_Windy','TX_Sunny')
+  myDF = Datavec2DataFrame(myvec,'location','weather',"_")
+  if (myDF[1,1] == "NY" &
+      myDF[2,1] == "NY" &
+      myDF[3,1] == "TX" &
+      myDF[1,2] == "Rainy"&
+      myDF[2,2] == "Windy"&
+      myDF[3,2] == "Sunny"){
+    score[1, 2] = 1
+    
+  } else{
+    score[1, 3] <- "Missed Q1"
+  }
+} else{
+  score[1, 3] <- "Skipped Q1"
+}
+```
+
+```{r q2 - SLR1}
+
+if (exists("MyLM") == TRUE){
+  data(iris)
+  myFormula = as.formula("Sepal.Length ~ Petal.Length")
+  fit_iris = lm(formula = myFormula,data = iris)
+  x = MyLM(myFormula,iris)
+  if (round(x$coefficients[1],4) == 4.3066){
+    score[2, 2] = 1
+  } else{
+    score[2, 3] <- "Missed Q2"
+  }
+} else{
+  score[2, 3] <- "Skipped Q2"
+}
+```
+
+
+```{r q3 - SLR2, results='asis'}
+if (exists("PlotSLRCI") == TRUE){
+  
+  # data(cars)
+  # fit = lm(dist ~ speed,cars)
+  # 
+  # PlotSLRCI(fit = fit,data = cars)
+  
+  
+  functionText = capture.output(PlotSLRCI)
+  if(length(grep("abline",functionText))>1 &
+     length(grep("confint",functionText))>0){
+    score[3, 2] = 1
+  } else{
+    score[3, 3] <- "Missed Q3"
+  }
+} else{
+  score[3, 3] <- "Skipped Q3"
+}
+
+```
+
+
+
+```{r q4 - qTMat1}
+if (exists("TMAT1") == TRUE){
+  rLast = rep(c('A','B','C'),c(3,4,5))
+  rNow  = rep(c('A','B','C'),c(5,2,5))
+  out = TMAT1(rLast,rNow)
+  answer = c(1,.5,0,0,.5,0,0,0,1)
+  dim(answer) = c(3,3)
+  
+  if (all.equal(out,answer) == TRUE){
+    score[4, 2] = 1
+  } else{
+    score[4, 3] <- "Missed Q4"
+  }
+} else{
+  score[4, 3] <- "Skipped Q4"
+}
+
+```
+
+
+```{r q5 - qTMat2}
+if (exists("Forecast_nPeriod") == TRUE){
+  
+  initialStates = matrix(c(20,30,10),1)
+  tmat = matrix(c(1,.5,0,0,.5,0,0,0,1),3)
+
+  states1 = Forecast_nPeriod(initialStates,tmat,1)
+  states2 = Forecast_nPeriod(initialStates,tmat,2)
+  states3 = Forecast_nPeriod(initialStates,tmat,3)
+  
+  if (states3[1] == 46.25) {
+    score[5, 2] = 1  
+  }else{
+    score[5, 3] <- "Missed Q5"
+  }
+}else{
+  score[5, 3] <- "Skipped Q5"
+}
+
+```
+
+
+
+```{r q6 - qTMat2Bonus}
+initialStates = matrix(c(20,30,10),1)
+tmat = matrix(c(1,.5,0,0,.5,0,0,0,1),3)
+
+if (exists("Forecast_nPeriod_Recursive") == TRUE){
+  states1 = Forecast_nPeriod_Recursive(initialStates,tmat,1)
+  states2 = Forecast_nPeriod_Recursive(initialStates,tmat,2)
+  states3 = Forecast_nPeriod_Recursive(initialStates,tmat,3)
+  
+  if (states3[1] == 46.25) {
+    score[6, 2] = 1  
+  }else{
+    score[6, 2] = 1  
+    score[6, 3] <- "Missed Q6"
+  }
+}else{
+  score[6, 2] = 1  
+  score[6, 3] <- "Skipped Q6"
+}
+
+```
+
+
+```{r q7 - qBondDuration}
+if (exists("getBondDuration") == TRUE){
+  
+  y = 0.03
+  face = 2000000
+  couponRate = 0.04
+  m = 10
+  
+  functionText = capture.output(getBondDuration)
+  
+  x = getBondDuration(y, face, couponRate, m)
+  if( round(x,2) == 8.51){
+    score[7, 2] = score[7, 2] + .5 
+  }else{
+    score[7, 3] <- "Missed a Q7 test, did not include ppy=1"
+  }
+  
+  x = getBondDuration(y, face, couponRate, m,  1)
+  if( round(x,2) == 8.51){
+    score[7, 2] = score[7, 2] +.25 
+  }else{
+    score[7, 3] <- "Missed a Q7 test"
+  }
+  
+  x = getBondDuration(y, face, couponRate, m,  2)
+  if( round(x,2) == 8.42){
+    score[7, 2] = score[7, 2] +.25 
+  }else{
+    score[7, 3] <- "Missed a Q7 test"
+  }
+  
+  if(length(grep("for",functionText))){
+    cat("No 'for' loops allowed!")
+    score[7, 3] <- "On Q7: No 'for' loops allowed!"
+  }
+}else{
+  score[7, 3] <- "Skipped Q7"
+}
+
+```
+
+
+```{r q8 - GetReturnLag}
+
+if (exists("getReturns") == TRUE){
+  x = c(100,120,150,200)
+  rets1 = getReturns(x,1)
+  rets2 = getReturns(x,2)
+  rets3 = getReturns(x,3)
+  if(!is.null(rets1)){
+    if (round(rets1[1],2) == 0.20 &
+        round(rets1[2],2) == 0.25 &
+        round(rets1[3],2) == 0.33 &
+        round(rets2[1],2) == 0.50 &
+        round(rets3[1],2) == 1.00){
+      score[8, 2] =  1
+    } else{
+      score[8, 3] <- "Missed Q8"
+    }
+  }else{
+    score[8, 3] <- "Missed Q8, output NULL"
+  }
+}else{
+  score[8, 3] <- "Skipped Q8" 
+  
+}
+
+
+```
+
+
+
+```{r q9 - qVar}
+if (exists("PercentVaR") == TRUE){
+  
+  r = rnorm(n = 1000000,mean = .05,sd = .03)
+  probabily2SD = pnorm(2) # 98%
+  
+  myalpha = probabily2SD 
+  myPercentVaR = PercentVaR(r,myalpha)
+  
+  if(round(myPercentVaR,2) == .01){
+    score[9, 2] =  1
+  }else{
+    score[9, 3] <- "Missed Q9"
+  }
+} else{
+  score[9, 3] <- "Skipped Q9"
+}
+
+
+```
+
+
+```{r q10 - qES}
+if (exists("ES") == TRUE){
+  u = runif(100000,0,100)
+  if(round(ES(losses = u, alpha = .8),0) == 90 &
+     round(ES(losses = u, VaR   = 80),0) == 90){
+    score[10,2] = 1
+  }else{
+    score[10, 3] <- "Missed Q10"
+  }
+}else{
+  score[10, 3] <- "Skipped Q10"
+}
+
+
+```
+
+
+```{r notes}
+if (exists("missed_spelling")== TRUE){
+  score[11,2] = -.5
+  score[11, 3] <- "Missed spelled a function"
+}
+  
+if (exists("install_packs")== TRUE){
+  score[12,2] =  -.5
+  score[12, 3] <- "Didn't comment out install packages"
+}  
+  
+```
+
+
+
+```{r}
+final <- data.frame(matrix(ncol = 3, nrow = 1))
+colnames(final) <- c('name', 'score', 'notes')
+
+final$name = word(students[grading],1,sep = "\\_")
+final$score = sum(score$points)
+
+final$notes = paste(score$notes[!is.na(score$notes)], collapse = "; ")
+```
+
+```{r}
+write.table(final,  
+            file="grades.csv", 
+            append = T, 
+            sep=',', 
+            row.names=F,
+            col.names= F)
+```
+
+```{r, results = asis}
+final
+print("Done!!!!!!!!!")
+
+```
+
