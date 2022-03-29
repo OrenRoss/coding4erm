@@ -1,0 +1,18 @@
+# ignore all .log files
+*.log
+
+# ignore ALL files in ANY directory named temp
+temp/ 
+
+
+#ignore all .csv files
+*.csv
+
+
+#ignore all .xls files
+*.xls
+
+
+
+# ignore all folder names with submissions (for student submissions)
+*xls/
