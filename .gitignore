@@ -16,3 +16,7 @@ temp/
 
 # ignore all folder names with submissions (for student submissions)
 *xls/
+
+
+# ignore .DS_Store
+.DS_Store
